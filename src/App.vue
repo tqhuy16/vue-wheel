@@ -1,16 +1,16 @@
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 
 import Header from "@/components/Header.vue";
+import PointSpin from "@/components/PointSpin.vue";
+import FailSpin from "@/components/FailSpin.vue";
+import { setTopScore, getTopScore } from "@/utils/TopScoreStorage";
 
-const times = ref(0);
-const topScore = ref([
-  { userName: "MrHuy", score: 330 },
-  { userName: "Ramsey", score: 530 },
-  { userName: "Persie", score: 220 },
-  { userName: "Cazorla", score: 620 },
-  { userName: "Ben White", score: 470 },
-]);
+const isNewScore = ref(false);
+const isFail = ref(false);
+const yourScore = ref(0);
+const timesSpin = ref(0);
+const topScore = ref();
 const segments = ref([
   { value: 0, color: "#C6479F" },
   { value: 100, color: "#C32605" },
@@ -23,20 +23,41 @@ const segments = ref([
   { value: 800, color: "#954CDC" },
   { value: 900, color: "#662DA2" },
 ]);
-// const maxNumberSegments = ref(Math.floor(Math.random() * 8 + 1));
-// let maxNumberSegments = Math.floor(Math.random() * 10 + 1);
 const handleSpin = () => {
-  times.value = times.value + 1;
-  console.log(times.value);
-  if (times.value > 0) {
+  if (timesSpin.value < 3) {
+    const score = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900];
+    const random = Math.floor(Math.random() * score.length);
+    yourScore.value += score[random];
   }
+  timesSpin.value += 1;
 };
+
+watch(timesSpin, () => {
+  const lastTopScore = topScore.value.pop();
+  if (
+    timesSpin.value === 3 &&
+    (!lastTopScore?.score || yourScore.value > lastTopScore?.score)
+  )
+    isNewScore.value = true;
+
+  if (
+    timesSpin.value === 3 &&
+    (lastTopScore?.score || yourScore.value < lastTopScore?.score)
+  )
+    isFail.value = true;
+});
+
+onMounted(() => {
+  const topScoreStorage = getTopScore() || [];
+  topScore.value = [...topScoreStorage];
+  console.log("onMounted", topScoreStorage);
+});
 </script>
 
 <template>
   <Header />
   <div class="guide">
-    <span class="lucky">Feeling lucky?</span>
+    <span class="lucky">Feeling lucky?{{ yourScore }}</span>
     <span
       >Try out our spin and win game to win one of our exciting prizes.</span
     >
@@ -58,9 +79,9 @@ const handleSpin = () => {
     </div>
   </div>
   <div class="top-score">
-    <div class="title-score">Leader Board</div>
+    <div v-if="topScore?.length > 0" class="title-score">Leader Board</div>
     <div
-      v-for="(top, index) in topScore.sort((a, b) => b.score - a.score)"
+      v-for="(top, index) in topScore"
       :key="`${index - top.userName}`"
       class="item-score"
       :class="`${index === 0 ? 'first' : ''}`"
@@ -80,6 +101,8 @@ const handleSpin = () => {
       <div class="score-info">{{ top.score }}</div>
     </div>
   </div>
+  <PointSpin v-if="isNewScore" />
+  <FailSpin v-if="isFail" />
 </template>
 
 <style scoped>
@@ -101,8 +124,8 @@ const handleSpin = () => {
 }
 
 .container {
-  width: 315px;
-  height: 315px;
+  width: 347px;
+  height: 347px;
   background-color: #ccc;
   border-radius: 50%;
   border: 10px solid #dde;
@@ -114,18 +137,16 @@ const handleSpin = () => {
 
 .container div {
   height: 50%;
-  width: 245px;
+  width: 285px;
   position: absolute;
   clip-path: polygon(70% 0%, 50% 100%, 30% 0%);
   transform-origin: bottom;
-  text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
   font-weight: bold;
   color: #fff;
-  left: 25px;
+  left: 20px;
 }
 
 .arrow {
@@ -141,7 +162,7 @@ const handleSpin = () => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 10;
+  z-index: 1;
   background-color: #e2e2e2;
   text-transform: uppercase;
   border: 8px solid #fff;
