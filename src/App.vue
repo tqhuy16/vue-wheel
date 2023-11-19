@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 import Header from "@/components/Header.vue";
 import PointSpin from "@/components/PointSpin.vue";
@@ -35,21 +35,18 @@ const handleSpin = () => {
   isSpinning.value = true;
   if (timesSpin.value < 4) {
     const scoreList = segments.value.map((el) => el.value);
-
     let number = Math.floor(Math.random() * 10 + 1);
 
     yourSpinScore.value = scoreList[number - 1];
     yourTotalScore.value += scoreList[number - 1];
-    console.log("number", number);
-    console.log("yourSpinScore.value", yourSpinScore.value);
-    console.log("yourTotalScore.value", yourTotalScore.value);
     containerRef.value.style.transform = `rotate(${
       -((number - 1) * 36) - 720 * timesSpin.value
     }deg)`;
 
     setTimeout(() => {
       isNewScore.value = true;
-    }, 5500);
+      isSpinning.value = false;
+    }, 5000);
   }
 };
 
@@ -70,7 +67,6 @@ const setNameTopScore = (name) => {
 };
 
 const nextTime = () => {
-  isSpinning.value = false;
   if (timesSpin.value === 3) {
     const lastTopScore = topScore.value[topScore.value.length - 1];
     if (topScore.value.length < 5) {
@@ -111,7 +107,13 @@ onMounted(() => {
   <div class="spin-app">
     <img src="@/assets/union.png" class="arrow" />
     <div class="container" ref="containerRef">
-      <button class="spin" @click="handleSpin">Spin</button>
+      <button
+        class="spin"
+        :class="isSpinning && 'running'"
+        @click="!isSpinning && handleSpin()"
+      >
+        {{ !isSpinning ? "spin" : "" }}
+      </button>
       <div
         v-for="(seg, index) in segments"
         :key="seg.color"
@@ -178,6 +180,7 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   position: relative;
+  margin-bottom: 13px;
 }
 
 .container {
@@ -222,7 +225,7 @@ onMounted(() => {
   z-index: 1;
   background-color: #e2e2e2;
   text-transform: uppercase;
-  border: 8px solid #fff;
+  border: 2px solid #fff;
   font-weight: bold;
   font-size: 20px;
   color: #a2a2a2;
@@ -234,9 +237,23 @@ onMounted(() => {
   letter-spacing: 1px;
 }
 
+.running {
+  border: none;
+  background-color: black;
+}
+
+.sin span {
+}
+
+.spin,
+.disable {
+}
+
 .top-score {
-  margin-top: 13px;
   color: #fff;
+  transform: translateX(-50%);
+  left: 50%;
+  position: relative;
 }
 .title-score {
   font-size: 22px;
@@ -301,8 +318,9 @@ onMounted(() => {
   width: 37px;
   height: 37px;
 }
-/* @media (min-width: 1024px) {
-} */
-@media only screen and (max-width: 375px) {
+@media only screen and (min-width: 768px) {
+  .top-score {
+    max-width: 600px;
+  }
 }
 </style>

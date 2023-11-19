@@ -36,6 +36,12 @@
   font-size: 28px;
   font-weight: 900;
 }
-@media only screen and (max-width: 375px) {
+@media only screen and (min-width: 768px) {
+  .header {
+    max-width: 500px;
+    transform: translateX(-50%);
+    left: 50%;
+    position: relative;
+  }
 }
 </style>
