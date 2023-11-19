@@ -273,7 +273,9 @@ onMounted(() => {
 }
 
 .first {
-  border-radius: 8px 8px 0 0;
+  border-radius: 8px 8px 8px 8px;
+  transform: scale(1.05);
+  background-color: #24375a;
 }
 
 .one-top {
@@ -282,6 +284,12 @@ onMounted(() => {
 
 .first .score-info {
   border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+  background-color: #24375a;
+}
+.first .user-info .group-info .rank,
+.user-name {
+  color: #fff;
 }
 .user-info {
   display: flex;
