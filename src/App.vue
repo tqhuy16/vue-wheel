@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 
 import Header from "@/components/Header.vue";
 import PointSpin from "@/components/PointSpin.vue";
@@ -7,6 +7,7 @@ import FailSpin from "@/components/FailSpin.vue";
 import NameTopScore from "@/components/NameTopScore.vue";
 import { setTopScore, getTopScore } from "@/utils/TopScoreStorage";
 
+const containerRef = ref(null);
 const isNewScore = ref(false);
 const isFail = ref(false);
 const isNameTopScore = ref(false);
@@ -14,6 +15,8 @@ const yourSpinScore = ref(0);
 const yourTotalScore = ref(0);
 const timesSpin = ref(0);
 const topScore = ref();
+const isSpinning = ref(false);
+
 const segments = ref([
   { value: 0, color: "#C6479F" },
   { value: 100, color: "#C32605" },
@@ -26,14 +29,27 @@ const segments = ref([
   { value: 800, color: "#954CDC" },
   { value: 900, color: "#662DA2" },
 ]);
+
 const handleSpin = () => {
   timesSpin.value += 1;
+  isSpinning.value = true;
   if (timesSpin.value < 4) {
-    const score = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900];
-    const random = Math.floor(Math.random() * score.length);
-    yourSpinScore.value = score[random];
-    yourTotalScore.value += score[random];
-    isNewScore.value = true;
+    const scoreList = segments.value.map((el) => el.value);
+
+    let number = Math.floor(Math.random() * 10 + 1);
+
+    yourSpinScore.value = scoreList[number - 1];
+    yourTotalScore.value += scoreList[number - 1];
+    console.log("number", number);
+    console.log("yourSpinScore.value", yourSpinScore.value);
+    console.log("yourTotalScore.value", yourTotalScore.value);
+    containerRef.value.style.transform = `rotate(${
+      -((number - 1) * 36) - 720 * timesSpin.value
+    }deg)`;
+
+    setTimeout(() => {
+      isNewScore.value = true;
+    }, 5500);
   }
 };
 
@@ -44,6 +60,7 @@ const newPlayTime = () => {
   isNewScore.value = false;
   isFail.value = false;
   isNameTopScore.value = false;
+  containerRef.value.style.removeProperty("transform");
 };
 
 const setNameTopScore = (name) => {
@@ -53,6 +70,7 @@ const setNameTopScore = (name) => {
 };
 
 const nextTime = () => {
+  isSpinning.value = false;
   if (timesSpin.value === 3) {
     const lastTopScore = topScore.value[topScore.value.length - 1];
     if (topScore.value.length < 5) {
@@ -85,14 +103,14 @@ onMounted(() => {
 <template>
   <Header />
   <div class="guide">
-    <span class="lucky">Feeling lucky?{{ yourTotalScore }}</span>
+    <span class="lucky">Feeling lucky?</span>
     <span
       >Try out our spin and win game to win one of our exciting prizes.</span
     >
   </div>
   <div class="spin-app">
     <img src="@/assets/union.png" class="arrow" />
-    <div class="container">
+    <div class="container" ref="containerRef">
       <button class="spin" @click="handleSpin">Spin</button>
       <div
         v-for="(seg, index) in segments"
