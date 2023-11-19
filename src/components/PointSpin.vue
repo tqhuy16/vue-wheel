@@ -1,9 +1,7 @@
 <script setup>
-import { computed, ref } from "vue";
-
 import Modal from "@/components/Modal.vue";
 
-const namePlayer = ref("");
+const props = defineProps(["spin-score"]);
 </script>
 
 <template>
@@ -12,21 +10,15 @@ const namePlayer = ref("");
       <img src="@/assets/gif.png" class="gif" />
       <div class="congratulations">Congratulations</div>
       <div class="content-point">
-        <span class="get-point">You have won..... </span>
-        <span
-          >Try out our spin and win game to win one of our exciting
-          prizes.</span
+        <span class="get-point">You have won {{ props.spinScore }} point </span>
+        <span>
+          Try out our spin and win game to win one of our exciting prizes.</span
         >
       </div>
-      <input
-        v-model="namePlayer"
-        placeholder="Type Your Name..."
-        class="new-top-score-name"
-      />
       <button
         class="btn-again"
-        :class="namePlayer ? 'enable' : ''"
-        :disabled="!namePlayer"
+        :disabled="false"
+        @click="$emit('nextTime', namePlayer)"
       >
         TRY AGAIN
       </button>
@@ -55,12 +47,6 @@ const namePlayer = ref("");
   font-size: 14px;
   margin-bottom: 27px;
 }
-.new-top-score-name {
-  height: 30px;
-  padding: 0 10px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-}
 .get-point {
   font-size: 16px;
   font-weight: 600;
@@ -74,8 +60,6 @@ const namePlayer = ref("");
   border: none;
   height: 35px;
   width: 158px;
-}
-.enable {
   background-color: #ffc721;
   cursor: pointer;
 }

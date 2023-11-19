@@ -1,14 +1,17 @@
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref } from "vue";
 
 import Header from "@/components/Header.vue";
 import PointSpin from "@/components/PointSpin.vue";
 import FailSpin from "@/components/FailSpin.vue";
+import NameTopScore from "@/components/NameTopScore.vue";
 import { setTopScore, getTopScore } from "@/utils/TopScoreStorage";
 
 const isNewScore = ref(false);
 const isFail = ref(false);
-const yourScore = ref(0);
+const isNameTopScore = ref(false);
+const yourSpinScore = ref(0);
+const yourTotalScore = ref(0);
 const timesSpin = ref(0);
 const topScore = ref();
 const segments = ref([
@@ -24,40 +27,65 @@ const segments = ref([
   { value: 900, color: "#662DA2" },
 ]);
 const handleSpin = () => {
-  if (timesSpin.value < 3) {
+  timesSpin.value += 1;
+  if (timesSpin.value < 4) {
     const score = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900];
     const random = Math.floor(Math.random() * score.length);
-    yourScore.value += score[random];
+    yourSpinScore.value = score[random];
+    yourTotalScore.value += score[random];
+    isNewScore.value = true;
   }
-  timesSpin.value += 1;
 };
 
-watch(timesSpin, () => {
-  const lastTopScore = topScore.value.pop();
-  if (
-    timesSpin.value === 3 &&
-    (!lastTopScore?.score || yourScore.value > lastTopScore?.score)
-  )
-    isNewScore.value = true;
+const newPlayTime = () => {
+  timesSpin.value = 0;
+  yourSpinScore.value = 0;
+  yourTotalScore.value = 0;
+  isNewScore.value = false;
+  isFail.value = false;
+  isNameTopScore.value = false;
+};
 
-  if (
-    timesSpin.value === 3 &&
-    (lastTopScore?.score || yourScore.value < lastTopScore?.score)
-  )
-    isFail.value = true;
-});
+const setNameTopScore = (name) => {
+  setTopScore({ userName: name, score: yourTotalScore.value });
+  getNewTopScore();
+  newPlayTime();
+};
 
-onMounted(() => {
+const nextTime = () => {
+  if (timesSpin.value === 3) {
+    const lastTopScore = topScore.value[topScore.value.length - 1];
+    if (topScore.value.length < 5) {
+      isNameTopScore.value = true;
+      return;
+    }
+    if (yourTotalScore.value < lastTopScore?.score) {
+      isFail.value = true;
+    } else {
+      isNameTopScore.value = true;
+    }
+  }
+  isNewScore.value = false;
+};
+
+const tryAgain = () => {
+  newPlayTime();
+};
+
+const getNewTopScore = () => {
   const topScoreStorage = getTopScore() || [];
   topScore.value = [...topScoreStorage];
-  console.log("onMounted", topScoreStorage);
+};
+
+onMounted(() => {
+  getNewTopScore();
 });
 </script>
 
 <template>
   <Header />
   <div class="guide">
-    <span class="lucky">Feeling lucky?{{ yourScore }}</span>
+    <span class="lucky">Feeling lucky?{{ yourTotalScore }}</span>
     <span
       >Try out our spin and win game to win one of our exciting prizes.</span
     >
@@ -84,7 +112,9 @@ onMounted(() => {
       v-for="(top, index) in topScore"
       :key="`${index - top.userName}`"
       class="item-score"
-      :class="`${index === 0 ? 'first' : ''}`"
+      :class="`${index === 0 ? 'first' : ''} ${
+        topScore?.length === 1 ? 'one-top' : ''
+      }`"
     >
       <div class="user-info">
         <div class="group-info">
@@ -101,8 +131,17 @@ onMounted(() => {
       <div class="score-info">{{ top.score }}</div>
     </div>
   </div>
-  <PointSpin v-if="isNewScore" />
-  <FailSpin v-if="isFail" />
+  <PointSpin
+    v-if="isNewScore"
+    @next-time="nextTime"
+    :spin-score="yourSpinScore"
+  />
+  <FailSpin v-if="isFail" @try-again="tryAgain" />
+  <NameTopScore
+    v-if="isNameTopScore"
+    :total-score="yourTotalScore"
+    @setNameTopScore="setNameTopScore"
+  />
 </template>
 
 <style scoped>
@@ -195,7 +234,8 @@ onMounted(() => {
   height: 57px;
 }
 .item-score:last-child {
-  border-radius: 0 0 8px 8px;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
 }
 
 .item-score:last-child .score-info {
@@ -204,6 +244,10 @@ onMounted(() => {
 
 .first {
   border-radius: 8px 8px 0 0;
+}
+
+.one-top {
+  border-radius: 8px 8px 8px 8px;
 }
 
 .first .score-info {

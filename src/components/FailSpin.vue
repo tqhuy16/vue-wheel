@@ -13,7 +13,7 @@ import Modal from "@/components/Modal.vue";
           Try out our spin and win game to win one of our exciting prizes.</span
         >
       </div>
-      <button class="btn-again">TRY AGAIN</button>
+      <button class="btn-again" @click="$emit('tryAgain')">TRY AGAIN</button>
     </div>
   </Modal>
 </template>
