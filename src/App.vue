@@ -274,7 +274,7 @@ onMounted(() => {
 
 .first {
   border-radius: 8px 8px 8px 8px;
-  transform: scale(1.05);
+  transform: scale(1.02);
   background-color: #24375a;
 }
 
@@ -287,8 +287,10 @@ onMounted(() => {
   border-bottom-right-radius: 8px;
   background-color: #24375a;
 }
-.first .user-info .group-info .rank,
-.user-name {
+.first .user-info .group-info .user-name {
+  color: #fff;
+}
+.first .user-info .group-info .rank {
   color: #fff;
 }
 .user-info {
@@ -304,6 +306,7 @@ onMounted(() => {
 }
 .user-name {
   font-size: 13px;
+  color: black;
 }
 .rank {
   font-size: 12px;
