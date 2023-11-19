@@ -148,7 +148,9 @@ onMounted(() => {
           <span><img src="@/assets/small-star.png" /></span>
         </div>
       </div>
-      <div class="score-info">{{ top.score }}</div>
+      <div class="score-info">
+        <span>{{ top.score }}</span>
+      </div>
     </div>
   </div>
   <PointSpin
@@ -242,13 +244,6 @@ onMounted(() => {
   background-color: black;
 }
 
-.sin span {
-}
-
-.spin,
-.disable {
-}
-
 .top-score {
   color: #fff;
   transform: translateX(-50%);
@@ -311,6 +306,19 @@ onMounted(() => {
   display: flex;
   align-items: center;
   background-color: #596f93;
+  padding: 0 10px;
+}
+.score-info span {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 15px;
+  text-align: center;
+  font-size: 9px;
+  font-weight: bold;
+  height: 19px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .avatar {
   border-radius: 50%;
